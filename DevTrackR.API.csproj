@@ -7,6 +7,11 @@
     <UserSecretsId>312185bf-ecab-4dd6-9ce5-6420bf044b90</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>${NoWarn};1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="microsoft.entityframeworkcore.design" Version="6.0.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -14,6 +19,7 @@
     </PackageReference>
     <PackageReference Include="microsoft.entityframeworkcore.inmemory" Version="6.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
+    <PackageReference Include="sendgrid.extensions.dependencyinjection" Version="1.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 

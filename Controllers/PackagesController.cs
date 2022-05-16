@@ -1,9 +1,9 @@
 using DevTrackR.API.Entities;
 using DevTrackR.API.Models;
-using DevTrackR.API.Persistence;
 using DevTrackR.API.Persistence.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace DevTrackR.API.Controllers
 {
@@ -12,10 +12,12 @@ namespace DevTrackR.API.Controllers
     public class PackagesController : ControllerBase
     {
         private readonly IPackageRepository _repository;
+        private readonly ISendGridClient _client;
 
-        public PackagesController(IPackageRepository repository)
+        public PackagesController(IPackageRepository repository, ISendGridClient client)
         {
             _repository = repository;
+            _client = client;
         }
 
         [HttpGet]
@@ -39,8 +41,23 @@ namespace DevTrackR.API.Controllers
             return Ok(package);
         }
 
+        /// <summary>
+        /// Cadastro de um pacote
+        /// </summary>
+        /// <remarks>
+        /// {
+        /// "title": "Pacote de cartas colecionáveis",
+        /// "weight": 1.8,
+        /// "senderName": "Felipe",
+        /// "senderEmail": teste@hello.com.br
+        /// }
+        /// </remarks>
+        /// <param name="model">Dados do Pacote</param>
+        /// <returns>Objeto recém-criado.</returns>
+        /// <response code="201">Cadastro realizado com sucesso.</response>>
+        /// <response code="400">Dados estão inválidos.</response>
         [HttpPost]
-        public IActionResult Post(AddPackageInputModel model)
+        public async Task<ActionResult> Post(AddPackageInputModel model)
         {
             if (model.Title.Length < 10)
             {
@@ -49,6 +66,17 @@ namespace DevTrackR.API.Controllers
             var package = new Package(model.Title, model.Weight);
 
             _repository.Add(package);
+
+            var message = new SendGridMessage
+            {
+                From = new EmailAddress("felipecimardimacedo@gmail.com", "felipecmacedo"),
+                Subject = "Your package was dispatched",
+                PlainTextContent = $"Your package with code {package.Code} was dispatched"
+            };
+
+            message.AddTo(model.SenderEmail, model.SenderName);
+
+            await _client.SendEmailAsync(message);
 
             return CreatedAtAction("GetByCode", new { code = package.Code }, package);
         }
